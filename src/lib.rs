@@ -747,8 +747,10 @@ impl<'name, 'bufs, 'control> fmt::Debug for MsgHdrMut<'name, 'bufs, 'control> {
 ///
 /// This wraps `sock_txtime` on linux
 #[derive(Clone, Copy)]
+#[cfg(all(feature = "all", target_os = "linux"))]
 pub struct TxTime(libc::sock_txtime);
 
+#[cfg(all(feature = "all", target_os = "linux"))]
 impl TxTime {
     #[allow(clippy::new_without_default)]
     /// Create a new `TxTime` with all fields empty/ zeroed
@@ -773,18 +775,21 @@ impl TxTime {
     }
 }
 
+#[cfg(all(feature = "all", target_os = "linux"))]
 impl From<libc::sock_txtime> for TxTime {
     fn from(c: libc::sock_txtime) -> TxTime {
         TxTime(c)
     }
 }
 
+#[cfg(all(feature = "all", target_os = "linux"))]
 impl From<TxTime> for libc::sock_txtime {
     fn from(c: TxTime) -> libc::sock_txtime {
         c.0
     }
 }
 
+#[cfg(all(feature = "all", target_os = "linux"))]
 impl fmt::Debug for TxTime {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         "TxTime".fmt(fmt)
@@ -792,6 +797,7 @@ impl fmt::Debug for TxTime {
 }
 
 // TODO: Remove this once libc::sock_txtime implements PartialEq
+#[cfg(all(feature = "all", target_os = "linux"))]
 impl PartialEq for TxTime {
     fn eq(&self, other: &Self) -> bool {
         self.0.clockid == other.0.clockid && self.0.flags == other.0.flags

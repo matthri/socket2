@@ -74,7 +74,9 @@ use std::{io, slice};
 use libc::ssize_t;
 use libc::{in6_addr, in_addr};
 
-use crate::{Domain, Protocol, SockAddr, TcpKeepalive, TxTime, Type};
+#[cfg(all(feature = "all", target_os = "linux"))]
+use crate::TxTime;
+use crate::{Domain, Protocol, SockAddr, TcpKeepalive, Type};
 #[cfg(not(target_os = "redox"))]
 use crate::{MsgHdr, MsgHdrMut, RecvFlags};
 
