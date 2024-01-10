@@ -181,7 +181,6 @@ mod sys;
 #[cfg(not(any(windows, unix)))]
 compile_error!("Socket2 doesn't support the compile target");
 
-use libc::clockid_t;
 use sys::c_int;
 
 pub use sockaddr::SockAddr;
@@ -760,7 +759,7 @@ impl TxTime {
     }
 
     /// Set the clock to use for TxTime configuration
-    pub fn with_clock(mut self, clock_id: clockid_t) -> Self {
+    pub fn with_clock(mut self, clock_id: libc::clockid_t) -> Self {
         // TODO: Move clock setting in separate function in sys
         // TODO: Maybe wrap clock_id or use ClockId from nix crate
         self.0.clockid = clock_id;
