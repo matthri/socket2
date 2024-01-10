@@ -74,7 +74,7 @@ use std::{io, slice};
 use libc::ssize_t;
 use libc::{in6_addr, in_addr};
 
-use crate::{Domain, Protocol, SockAddr, TcpKeepalive, Type};
+use crate::{Domain, Protocol, SockAddr, TcpKeepalive, TxTime, Type};
 #[cfg(not(target_os = "redox"))]
 use crate::{MsgHdr, MsgHdrMut, RecvFlags};
 
@@ -1778,6 +1778,30 @@ impl crate::Socket {
                 libc::TCP_CORK,
                 cork as c_int,
             )
+        }
+    }
+
+    // TOOD: Maybe move this to a better location (only for testing here)
+    /// Get the `TxTime` configuration of this socket
+    #[cfg(all(feature = "all", target_os = "linux"))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = "all", target_os = "linux"))))]
+    pub fn txtime(&self) -> io::Result<TxTime> {
+        unsafe {
+            // TODO: check if this cast works correctly and if this can be simplified
+            getsockopt::<libc::sock_txtime>(self.as_raw(), libc::SOL_SOCKET, libc::SO_TXTIME)
+                .map(|txtime| txtime.into())
+        }
+    }
+
+    // TODO: Maybe move this to a better location (only for testing here)
+    /// Set the `TxTime` configuration of this socket
+    #[cfg(all(feature = "all", target_os = "linux"))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = "all", target_os = "linux"))))]
+    pub fn set_txtime(&self, txtime: TxTime) -> io::Result<()> {
+        unsafe {
+            // TODO: Check if the conversion should happen here or one layer up
+            let payload: libc::sock_txtime = txtime.into();
+            setsockopt(self.as_raw(), libc::SOL_SOCKET, libc::SO_TXTIME, payload)
         }
     }
 
