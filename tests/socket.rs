@@ -1736,6 +1736,7 @@ fn set_passcred() {
 
 #[test]
 #[cfg(all(feature = "all", target_os = "linux"))]
+#[ignore = "setting `SO_TXTIME` requires the `CAP_NET_ADMIN` capability (works when running as root)"]
 fn txtime() {
     // TODO: Maybe inplement this test with the test macro
     use socket2::TxTime;
