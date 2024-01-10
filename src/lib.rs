@@ -754,7 +754,7 @@ impl TxTime {
     #[allow(clippy::new_without_default)]
     /// Create a new `TxTime` with all fields empty/ zeroed
     pub fn new() -> TxTime {
-        // TODO: Chck if zeroed init is valid
+        // SAFETY: all zero is valid for `sock_txtime`
         TxTime(unsafe { mem::zeroed() })
     }
 
