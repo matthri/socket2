@@ -58,7 +58,7 @@
 // Disallow warnings in examples.
 #![doc(test(attr(deny(warnings))))]
 
-use std::fmt;
+use std::fmt::{self, Debug};
 #[cfg(not(target_os = "redox"))]
 use std::io::IoSlice;
 #[cfg(not(target_os = "redox"))]
@@ -739,5 +739,66 @@ impl<'addr, 'bufs, 'control> MsgHdrMut<'addr, 'bufs, 'control> {
 impl<'name, 'bufs, 'control> fmt::Debug for MsgHdrMut<'name, 'bufs, 'control> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         "MsgHdrMut".fmt(fmt)
+    }
+}
+
+/// Configuration of socket TxTime settings
+///
+/// This wraps `sock_txtime` on linux
+#[derive(Clone, Copy)]
+#[cfg(all(feature = "all", target_os = "linux"))]
+pub struct TxTime(libc::sock_txtime);
+
+#[cfg(all(feature = "all", target_os = "linux"))]
+impl TxTime {
+    #[allow(clippy::new_without_default)]
+    /// Create a new `TxTime` with all fields empty/ zeroed
+    pub fn new() -> TxTime {
+        // SAFETY: all zero is valid for `sock_txtime`
+        TxTime(unsafe { mem::zeroed() })
+    }
+
+    /// Set the clock to use for TxTime configuration
+    pub fn with_clock(mut self, clock_id: libc::clockid_t) -> Self {
+        // TODO: Move clock setting in separate function in sys
+        // TODO: Maybe wrap clock_id or use ClockId from nix crate
+        self.0.clockid = clock_id;
+        self
+    }
+
+    /// Set the flags for TxTime configuration
+    // TODO: Change flags datatype to c_int
+    pub fn with_flags(mut self, flags: u32) -> Self {
+        self.0.flags = flags;
+        self
+    }
+}
+
+#[cfg(all(feature = "all", target_os = "linux"))]
+impl From<libc::sock_txtime> for TxTime {
+    fn from(c: libc::sock_txtime) -> TxTime {
+        TxTime(c)
+    }
+}
+
+#[cfg(all(feature = "all", target_os = "linux"))]
+impl From<TxTime> for libc::sock_txtime {
+    fn from(c: TxTime) -> libc::sock_txtime {
+        c.0
+    }
+}
+
+#[cfg(all(feature = "all", target_os = "linux"))]
+impl fmt::Debug for TxTime {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+        "TxTime".fmt(fmt)
+    }
+}
+
+// TODO: Remove this once libc::sock_txtime implements PartialEq
+#[cfg(all(feature = "all", target_os = "linux"))]
+impl PartialEq for TxTime {
+    fn eq(&self, other: &Self) -> bool {
+        self.0.clockid == other.0.clockid && self.0.flags == other.0.flags
     }
 }
