@@ -2230,6 +2230,38 @@ impl crate::Socket {
         }
     }
 
+    /// Get the value of the `SO_PRIORITY` option on this socket
+    ///
+    /// For more information about this option, see [`set_priority`]
+    ///
+    /// [`set_priority`]: crate::Socket::set_priority
+    #[cfg(all(feature = "all", target_os = "linux"))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = "all", target_os = "linux"))))]
+    pub fn priority(&self) -> io::Result<usize> {
+        unsafe {
+            getsockopt::<c_int>(self.as_raw(), libc::SOL_SOCKET, libc::SO_PRIORITY)
+                .map(|priority| priority as usize)
+        }
+    }
+
+    /// Set value for the `SO_PRIORITY` option on this socket.
+    ///
+    /// Set the protocol-defined priority for all packets to be sent on this socket.
+    ///
+    /// Setting a priority outside the range 0 to 6 requires the `CAP_NET_ADMIN` capability.
+    #[cfg(all(feature = "all", target_os = "linux"))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = "all", target_os = "linux"))))]
+    pub fn set_priority(&self, priority: usize) -> io::Result<()> {
+        unsafe {
+            setsockopt(
+                self.as_raw(),
+                libc::SOL_SOCKET,
+                libc::SO_PRIORITY,
+                priority as c_int,
+            )
+        }
+    }
+
     /// Get the value of the `SO_REUSEPORT` option on this socket.
     ///
     /// For more information about this option, see [`set_reuse_port`].

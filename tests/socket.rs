@@ -1350,6 +1350,8 @@ test!(
 #[cfg(not(target_os = "redox"))]
 test!(out_of_band_inline, set_out_of_band_inline(true));
 test!(reuse_address, set_reuse_address(true));
+#[cfg(all(feature = "all", target_os = "linux"))]
+test!(priority, set_priority(4));
 #[cfg(all(
     feature = "all",
     not(any(windows, target_os = "solaris", target_os = "illumos"))
